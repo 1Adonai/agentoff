@@ -2,3 +2,4 @@
 internals/server/database/contacts.db
 server.crt
 server.key
+internals/server/logger/logs.txt

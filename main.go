@@ -3,12 +3,15 @@ package main
 import (
 	"agentoff/internals/server/database"
 	"agentoff/internals/server/handlers"
+	"agentoff/internals/server/logger"
 	"fmt"
 	"log"
 	"net/http"
 )
 
 func main() {
+	logger.InitLogger()
+	defer logger.CloseLogger()
 	database.InitDB()
 	http.HandleFunc("/", handlers.HomeHandler)
 	http.HandleFunc("/osago", handlers.OsagoHandler)
