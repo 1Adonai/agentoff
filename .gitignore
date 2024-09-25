@@ -1,2 +1,4 @@
 .vscode
 internals/server/database/contacts.db
+server.crt
+server.key
