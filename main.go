@@ -19,5 +19,5 @@ func main() {
 	http.HandleFunc("/admin", handlers.AdminHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	fmt.Println("Server starting at :8088")
-	log.Fatal(http.ListenAndServe(":8088", nil))
+	log.Fatal(http.ListenAndServeTLS(":8088", "server.crt", "server.key", nil))
 }
