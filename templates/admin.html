@@ -64,6 +64,8 @@
                   <th>Контактная информация</th>
                   <th>Услуга</th>
                   <th>Сообщение</th>
+                  <th>IP адрес</th>
+                  <th>Дата</th>
                 </tr>
               </thead>
               <tbody>
@@ -74,6 +76,8 @@
                   <td>{{.ContactInfo}}</td>
                   <td>{{.SelectOption}}</td>
                   <td>{{.Message}}</td>
+                  <td>{{.IP}}</td>
+                  <td>{{.CreatedAt.Format "02.01.2006 15:04"}}</td>
                 </tr>
                 {{end}}
               </tbody>

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"path"
 	"text/template"
-
+	"agentoff/internals/server/ratelimit"
 	"github.com/gorilla/sessions"
 )
 
@@ -39,18 +39,47 @@ func ParseContactForm(r *http.Request) (database.ContactForm, error) {
 		return database.ContactForm{}, err
 	}
 
+	// Get IP address
+	ip := r.Header.Get("X-Real-IP")
+	if ip == "" {
+		ip = r.Header.Get("X-Forwarded-For")
+	}
+	if ip == "" {
+		ip = r.RemoteAddr
+	}
+
 	return database.ContactForm{
 		Name:         r.FormValue("name"),
 		ContactType:  r.FormValue("contactType"),
 		ContactInfo:  r.FormValue("contactInfo"),
 		SelectOption: r.FormValue("selectOption"),
 		Message:      r.FormValue("message"),
+		IP:           ip,
 	}, nil
 }
 
 func ContactHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 		log.Println("Received a POST request to /contact")
+
+		// Get client's IP address
+		ip := r.Header.Get("X-Real-IP")
+		if ip == "" {
+			ip = r.Header.Get("X-Forwarded-For")
+		}
+		if ip == "" {
+			ip = r.RemoteAddr
+		}
+
+		// Check if the request is allowed
+		if !ratelimit.IsAllowed(ip) {
+			log.Printf("Rate limit exceeded for IP: %s", ip)
+			session, _ := store.Get(r, "session-name")
+			session.Values["message"] = "Слишком много запросов."
+			session.Save(r, w)
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
 
 		// Парсинг формы
 		contactForm, err := ParseContactForm(r)
@@ -93,6 +122,7 @@ func AdminHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		contacts, err := database.GetAllContacts()
 		if err != nil {
+			log.Printf("Error getting contacts: %v", err)
 			http.Error(w, "Ошибка при получении контактов", http.StatusInternalServerError)
 			return
 		}
