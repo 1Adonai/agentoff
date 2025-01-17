@@ -3,15 +3,30 @@ package handlers
 import (
 	"agentoff/internals/server/database"
 	"agentoff/internals/server/keys"
+	"agentoff/internals/server/ratelimit"
+	"agentoff/internals/server/telegram"
 	"log"
 	"net/http"
 	"path"
+	"strconv"
 	"text/template"
-	"agentoff/internals/server/ratelimit"
+
+	_ "agentoff/internals/server/telegram"
+
 	"github.com/gorilla/sessions"
 )
 
 var store = sessions.NewCookieStore([]byte("key"))
+var telegramBot *telegram.TelegramBot
+
+func init() {
+	var err error
+	chat_id, err := strconv.ParseInt(keys.GetEnv("telegram_chat_id"), 10, 64)
+	telegramBot, err = telegram.NewTelegramBot(keys.GetEnv("telegram_bot_token"), chat_id)
+	if err != nil {
+		log.Fatalf("Failed to initialize Telegram bot: %v", err)
+	}
+}
 
 func RenderTemplate(w http.ResponseWriter, r *http.Request, templateName string) {
 	tmpl, err := template.ParseFiles(path.Join("templates", templateName), path.Join("templates", "ContactForm.html"))
@@ -87,6 +102,12 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Error parsing form: %v", err)
 			http.Error(w, "Ошибка парсинга формы", http.StatusBadRequest)
 			return
+		}
+		// Send contact info to Telegram
+		err = telegramBot.SendContactInfo(contactForm.Name, contactForm.ContactInfo, contactForm.Message)
+		if err != nil {
+			log.Printf("Failed to send contact info to Telegram: %v", err)
+			// Handle error appropriately
 		}
 
 		log.Printf("Parsed form: %+v", contactForm)

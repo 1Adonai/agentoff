@@ -29,6 +29,10 @@ func GetEnv(str string) string {
 		return os.Getenv("ADMIN_USERNAME")
 	case "password":
 		return os.Getenv("ADMIN_PASSWORD")
+	case "telegram_bot_token":
+		return os.Getenv("TELEGRAM_BOT_TOKEN")
+	case "telegram_chat_id":
+		return os.Getenv("TELEGRAM_CHAT_ID")
 	default:
 		return ""
 	}
