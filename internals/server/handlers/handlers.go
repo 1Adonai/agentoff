@@ -132,37 +132,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
 	}
 }
-func AdminHandler(w http.ResponseWriter, r *http.Request) {
-	username, password, ok := r.BasicAuth()
-	if !ok || username != keys.GetEnv("login") || password != keys.GetEnv("password") {
-		w.Header().Set("WWW-Authenticate", `Basic realm="Restricted"`)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
 
-	if r.Method == "GET" {
-		contacts, err := database.GetAllContacts()
-		if err != nil {
-			log.Printf("Error getting contacts: %v", err)
-			http.Error(w, "Ошибка при получении контактов", http.StatusInternalServerError)
-			return
-		}
-
-		tmpl, err := template.ParseFiles("templates/admin.html")
-		if err != nil {
-			http.Error(w, "Ошибка при загрузке шаблона", http.StatusInternalServerError)
-			return
-		}
-
-		err = tmpl.Execute(w, contacts)
-		if err != nil {
-			http.Error(w, "Ошибка при отображении шаблона", http.StatusInternalServerError)
-			return
-		}
-	} else {
-		http.Error(w, "Метод не поддерживается", http.StatusMethodNotAllowed)
-	}
-}
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
 	RenderTemplate(w, r, "index.html")
 }

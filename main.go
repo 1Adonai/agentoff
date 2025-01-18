@@ -19,8 +19,7 @@ func main() {
 	http.HandleFunc("/house", handlers.HouseHandler)
 	http.HandleFunc("/dom", handlers.DomHandler)
 	http.HandleFunc("/contact", handlers.ContactHandler)
-	http.HandleFunc("/admin", handlers.AdminHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-	fmt.Println("Server starting at :8088")
-	log.Fatal(http.ListenAndServe(":8088", nil))
+	fmt.Println("Server starting at :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
