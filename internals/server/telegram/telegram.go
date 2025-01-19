@@ -22,13 +22,15 @@ func NewTelegramBot(token string, chatID int64) (*TelegramBot, error) {
 		chatID: chatID,
 	}, nil
 }
-
-func (t *TelegramBot) SendContactInfo(name, email, message string) error {
+func (t *TelegramBot) SendContactInfo(name, contactType, address, message string, option string, ip string) error {
 	text := fmt.Sprintf(
-		"\n\nName: %s\nEmail: %s\nMessage: %s",
+		"\n\nИмя: %s\nТип контакта: %s\nАдрес: %s\nСообщение: %s\nВыбранный вариант: %s\nIP: %s",
 		name,
-		email,
+    contactType,
+		address,
 		message,
+    option,
+    ip,
 	)
 
 	msg := tgbotapi.NewMessage(t.chatID, text)
